@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Jobs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+    <div class="d-flex justify-content-center vh-100 align-items-center">
+        <form action="/submit-jobs" method="post" class="p-4 border rounded shadow " style="width: 100%; max-width: 400px;">
+            
+            <label class="form-label mb-3"  for="title">Enter Title</label>
+            <input class="form-control mb-3" name="title" type="text" placeholder="Enter title of your job" required>
+
+            <label class="form-label mb-3" for="description">Enter Description</label>
+            <input class="form-control mb-3" type="text" name="description" placeholder="Enter Description" required>
+
+            <label class="form-label mb-3" for="role">Enter Role</label>
+            <input class="form-control mb-3" type="text" name="role" placeholder="Enter the role" required>
+
+            <label class="form-label mb-3" for="location">Enter the Location (Place / Remote)</label>
+            <input class="form-control mb-4" type="text" name="location" placeholder="Enter Location" required>
+
+            <button class=" btn btn-primary mx-auto d-block w-50" type="submit">Post</button>
+
+        </form>
+    </div>
+    
+</body>
+</html>
