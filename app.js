@@ -13,6 +13,9 @@ app.use(express.json());
 const jobRoutes = require('./routes/jobs');
 app.use('/', jobRoutes);
 
+const resultsRoute = require('./routes/results');
+app.use('/',resultsRoute);
+
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -29,7 +32,7 @@ app.set('view engine', 'ejs');
 
 
 app.get('/main', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'main.html'));
+    res.render('main');
 });
 
 
