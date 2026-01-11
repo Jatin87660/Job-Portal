@@ -1,15 +1,14 @@
+
 const express = require('express');
 const router = express.Router();
 const multer = require("multer");
+const natural = require('natural');
 const embedResume = require("../middleware/embedResume");
 const Job = require('../models/jobs');
 
-// Multer setup (store uploaded file in memory)
+
 const upload = multer({ storage: multer.memoryStorage() });
 
-// -------------------------------
-// Stopword list and cleaner
-// -------------------------------
 const STOPWORDS = new Set([
   'the', 'and', 'for', 'you', 'are', 'with', 'that', 'this', 'have', 'from',
   'your', 'our', 'was', 'were', 'will', 'can', 'job', 'role', 'position',
@@ -25,15 +24,38 @@ function cleanText(text = "") {
 }
 
 // -------------------------------
-// Text similarity (Sørensen–Dice coefficient)
+// Cosine similarity using TF-IDF
 // -------------------------------
-function textSimilarity(a, b) {
-  const wordsA = new Set(cleanText(a));
-  const wordsB = new Set(cleanText(b));
-  if (wordsA.size === 0 || wordsB.size === 0) return 0;
+function cosineSimilarityTFIDF(textA, textB) {
+  const TfIdf = natural.TfIdf;
+  const tfidf = new TfIdf();
 
-  const intersection = [...wordsA].filter(x => wordsB.has(x)).length;
-  return (2 * intersection) / (wordsA.size + wordsB.size);
+  // Clean and add both documents
+  tfidf.addDocument(cleanText(textA).join(" "));
+  tfidf.addDocument(cleanText(textB).join(" "));
+
+  const vecA = [];
+  const vecB = [];
+
+  // Collect all unique terms
+  const allTerms = new Set();
+  tfidf.listTerms(0).forEach(t => allTerms.add(t.term));
+  tfidf.listTerms(1).forEach(t => allTerms.add(t.term));
+
+  // Build numerical vectors
+  allTerms.forEach(term => {
+    vecA.push(tfidf.tfidf(term, 0));
+    vecB.push(tfidf.tfidf(term, 1));
+  });
+
+  // Compute cosine similarity
+  const dot = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
+  const magA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
+  const magB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
+
+  if (magA === 0 || magB === 0) return 0;
+
+  return dot / (magA * magB);
 }
 
 // -------------------------------
@@ -59,20 +81,20 @@ router.post(
         return res.render('results', { jobs: [], message: "No jobs found in database." });
       }
 
-      // Compute similarity
+      // Compute cosine similarity between resume and job descriptions
       const results = jobs.map(job => {
-        const similarity = textSimilarity(resumeText, job.description || "");
+        const similarity = cosineSimilarityTFIDF(resumeText, job.description || "");
         return { ...job.toObject(), similarity };
       });
 
-      // Filter & sort
+      // Filter and sort by similarity score
       const filtered = results
-        .filter(j => j.similarity >= 0.01) // lower threshold for better recall
+        .filter(j => j.similarity >= 0.01)
         .sort((a, b) => b.similarity - a.similarity);
 
       console.log(`🧠 Resume matched ${filtered.length} jobs`);
 
-      // Render EJS page
+      // Render results page
       res.render('results', {
         jobs: filtered,
         message:
@@ -88,3 +110,4 @@ router.post(
 );
 
 module.exports = router;
+

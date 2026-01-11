@@ -6,19 +6,22 @@
     <title>Document</title>
 </head>
 <body>
-      <h1>Matching Jobs</h1>
+      <div style="display: flex; justify-content: center; width: 100%; color: crimson;">
+    <h1>Matching Jobs</h1>
+</div>
+
 
 <% if (jobs.length === 0) { %>
   <p>No strong matches found.</p>
 <% } else { %>
   <ul>
     <% jobs.forEach(job => { %>
-      <li>
-        <h3><%= job.title %> - <%= (job.similarity * 100).toFixed(1) %>% match</h3>
+      <div style="border: solid rgb(117, 113, 113); width: 700px; padding-left: 20px;"><li>
+        <h3 style="color: rgb(168, 98, 24);"><%= job.title %> - <!-- <%= (job.similarity*100).toFixed(1) %>% match--></h3> 
         <p><strong>Role:</strong> <%= job.role %></p>
         <p><strong>Location:</strong> <%= job.location %></p>
         <p><%= job.description.slice(0, 300) %></p>
-      </li>
+      </li></div><br>
     <% }) %>
   </ul>
 <% } %>
